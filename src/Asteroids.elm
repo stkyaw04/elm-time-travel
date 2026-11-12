@@ -120,13 +120,11 @@ update computer model =
 
 shoot computer model =
   if spacePressed computer then
-    if model.justFiredShot then
-      model  -- make user release fire button to fire again
-    else
-      { model
-        | bullets = model.bullets ++ newBullet model
-        , justFiredShot = True
-      }
+    { model
+      | bullets = model.bullets ++ newBullet model
+      , justFiredShot = True
+      , shotsFired = model.shotsFired + 1
+    }
   else
     { model | justFiredShot = False }
 
