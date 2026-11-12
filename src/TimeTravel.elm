@@ -3,6 +3,8 @@ module TimeTravel exposing (addTimeTravel)
 import Playground exposing (..)
 import Set
 
+controlBarHeight = 64
+
 type alias TimeTravelModel rawModel = 
     { rawModel : rawModel
     , paused : Bool
@@ -20,7 +22,17 @@ initialStateWithTimeTravel rawGame =
     }
 
 viewWithTimeTravel rawGame computer model = 
-    rawGame.view computer model.rawModel
+    let 
+        helpMessage =
+            if model.paused then
+              "Press R to resume"
+            else
+              "Press T to time travel"
+    in
+        (rawGame.view computer model.rawModel) ++
+          [ words white helpMessage
+              |> move 0 (computer.screen.top - controlBarHeight / 2)
+          ]
 
 updateWithTimeTravel rawGame computer model = 
     if keyPressed "T" computer then
