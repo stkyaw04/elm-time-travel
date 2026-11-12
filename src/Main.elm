@@ -2,7 +2,7 @@ module Main exposing (..)
 
 import Asteroids
 import Mario
-
+import TimeTravel exposing (addTimeTravel)
 import Playground
 
 -- Converts the record-based { view, initialState, updateState } games this project uses into
@@ -13,5 +13,6 @@ gameApplication game =
 
 -- The main entry point for the app
 
-main = Mario.game
+main = Asteroids.game
+  |> addTimeTravel
   |> gameApplication

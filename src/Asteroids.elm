@@ -8,6 +8,8 @@ module Asteroids exposing (game)
 import Playground exposing (..)
 import Random
 import Set
+import String
+import List
 
 game =
   { initialState = initialState
@@ -45,6 +47,7 @@ type alias GameObject =
 type alias Model =
   { ship : GameObject
   , justFiredShot : Bool
+  , shotsFired : Int
   , asteroids : List GameObject
   , bullets : List GameObject
   }
@@ -63,6 +66,7 @@ initialState =
       }
   , justFiredShot = False
   , asteroids = []
+  , shotsFired = 0
   , bullets = []
   }
 
@@ -87,6 +91,16 @@ view computer model =
     ++ [model.ship      |> viewGameObject shipColor 1.0]
     ++ (model.asteroids |> List.map (viewGameObject asteroidColor 0.7))
     ++ (model.bullets   |> List.map (viewGameObject bulletColor 1.0))
+    ++ [model.shotsFired
+      |> String.fromInt
+      |> (\n -> "Shots Fired: " ++ n)
+      |> words white
+      |> move (computer.screen.left + 80) (computer.screen.top - 30)]
+    ++ [List.length model.asteroids
+      |> String.fromInt
+      |> (\n -> "Asteroids: " ++ n)
+      |> words white
+      |> move (computer.screen.left + 80) (computer.screen.top - 60) ]
 
 viewGameObject : Color -> Float -> GameObject -> Shape
 viewGameObject color opacity obj =
