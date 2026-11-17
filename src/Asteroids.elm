@@ -95,12 +95,12 @@ view computer model =
       |> String.fromInt
       |> (\n -> "Shots Fired: " ++ n)
       |> words white
-      |> move (computer.screen.left + 80) (computer.screen.top - 30)]
+      |> move (computer.screen.left + 60) (computer.screen.top - 90)]
     ++ [List.length model.asteroids
       |> String.fromInt
       |> (\n -> "Asteroids: " ++ n)
       |> words white
-      |> move (computer.screen.left + 80) (computer.screen.top - 60) ]
+      |> move (computer.screen.left + 60) (computer.screen.top - 110) ]
 
 viewGameObject : Color -> Float -> GameObject -> Shape
 viewGameObject color opacity obj =
@@ -120,11 +120,14 @@ update computer model =
 
 shoot computer model =
   if spacePressed computer then
-    { model
-      | bullets = model.bullets ++ newBullet model
-      , justFiredShot = True
-      , shotsFired = model.shotsFired + 1
-    }
+    if model.justFiredShot then
+      model
+    else 
+      { model
+        | bullets = model.bullets ++ newBullet model
+        , justFiredShot = True
+        , shotsFired = model.shotsFired + 1
+      }
   else
     { model | justFiredShot = False }
 
