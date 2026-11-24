@@ -6,6 +6,7 @@ import Set
 controlBarHeight = 64
 maxVisibleHistory = 2000
 
+-- not actually used throughout the file -- 
 type alias TimeTravelModel rawModel = 
     { rawModel : rawModel
     , paused : Bool
@@ -21,6 +22,7 @@ initialStateWithTimeTravel rawGame =
     { rawModel = rawGame.initialState
     , paused = False
     , history = []
+    , historyPlaybackPosition = 0
     }
 
 viewWithTimeTravel rawGame computer model = 
@@ -38,7 +40,7 @@ viewWithTimeTravel rawGame computer model =
 
         helpMessage =
             if model.paused then
-              "Press R to resume"
+              "Press R to resume. Drag the bar to travel back in time!"
             else
               "Press T to time travel"
     in
@@ -47,16 +49,25 @@ viewWithTimeTravel rawGame computer model =
               |> move 0 (computer.screen.top - controlBarHeight / 2) ]
         ++ [ historyBar black 0.3 maxVisibleHistory ]
         ++ [ historyBar (rgb 255 192 203) 0.6 (List.length model.history)]
+        ++ [ historyBar (rgb 56 124 68) 0.8 (model.historyPlaybackPosition)]
 
 updateWithTimeTravel rawGame computer model = 
-    if keyPressed "T" computer then
-        { model | paused = True }
-    else if keyPressed "R" computer then
-        {model | paused = False, rawModel = rawGame.updateState computer model.rawModel }
-    else if model.paused then
-        model
+    if model.paused && computer.mouse.down then
+        let 
+            newPlaybackPosition = min (mousePosToHistoryIndex computer) (List.length model.history)
+            replayHistory pastInputs = List.foldl rawGame.updateState rawGame.initialState pastInputs
+        in 
+           {model | historyPlaybackPosition = newPlaybackPosition, rawModel = replayHistory (List.take newPlaybackPosition model.history)} 
     else
-        { model | rawModel = rawGame.updateState computer model.rawModel, history = model.history ++ [computer] }
+        if keyPressed "T" computer then
+            { model | paused = True }
+        else if keyPressed "R" computer then
+            {model | paused = False, rawModel = rawGame.updateState computer model.rawModel, history = List.take model.historyPlaybackPosition model.history }
+
+        else if model.paused then
+            model
+        else
+            { model | rawModel = rawGame.updateState computer model.rawModel, history = model.history ++ [computer], historyPlaybackPosition = List.length model.history + 1 }
 
 --- helper functions ---
 
@@ -69,3 +80,9 @@ keyPressed keyName computer =
 -- Converts an index in the history list to an x coordinate on the screen
 historyIndexToX computer index =
   (toFloat index) / maxVisibleHistory * computer.screen.width
+
+-- Converts the mouse's current position to an index within the history list
+mousePosToHistoryIndex computer =
+  (computer.mouse.x - computer.screen.left)
+    / computer.screen.width * maxVisibleHistory
+  |> round
